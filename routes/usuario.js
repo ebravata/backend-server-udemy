@@ -1,6 +1,6 @@
 var express = require('express');
-var bcrypt = require('bcryptjs'); // libreria para encriptar la contraseña
 var app = express();
+var bcrypt = require('bcryptjs'); // libreria para encriptar la contraseña
 
 var Usuario = require('../models/usuario');
 var mdAutenticacion = require('../middlewares/autenticacion')
@@ -11,8 +11,14 @@ var mdAutenticacion = require('../middlewares/autenticacion')
 
 app.get('/', (req, res, next) => {
 
+    var desde = req.query.desde || 0; // se obtiene el parametro 'desde' que viene de la URL, si no viene por defaul será un 0
+
+    desde = Number(desde);
+
     // Usuario.find({}, (err, usuarios) => { Con los parametros asi devuelve todos los campos de los usuarios hasta el password
     Usuario.find({}, 'nombre email role img') // Se puede especificar los campos que se desea que se devuelvan
+        .skip(desde)
+        .limit(5)
         .exec(
             (err, usuarios) => {
                 if (err) {
@@ -22,10 +28,15 @@ app.get('/', (req, res, next) => {
                         errors: err
                     });
                 }
-                res.status(200).json({
-                    ok: true,
-                    usuarios: usuarios
-                });
+
+                Usuario.count({}, (err, conteo) => {
+
+                    res.status(200).json({
+                        ok: true,
+                        usuarios: usuarios,
+                        total: conteo
+                    });
+                })
             });
 });
 
@@ -50,7 +61,7 @@ app.get('/', (req, res, next) => {
 // });
 
 // ===========================================
-// Actualizar un nuevo usuario
+// Actualizar un usuario
 // ===========================================
 app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
@@ -82,7 +93,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'Error al grabar los nuevos datos al usuario el usuario',
+                    mensaje: 'Error al grabar los nuevos datos al usuario',
                     errors: err
                 });
             }
