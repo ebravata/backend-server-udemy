@@ -7,7 +7,7 @@ var Medico = require('../models/medico');
 var Usuario = require('../models/usuario');
 
 // ================================================
-// Busqueda por coleccion 
+// Busqueda por coleccion
 // ================================================
 app.get('/coleccion/:tabla/:busqueda', (req, res, next) => {
 
@@ -120,7 +120,7 @@ function buscarUsuarios(busqueda, regex) {
 
     return new Promise((resolve, reject) => {
 
-        Usuario.find({}, 'nombre email role')
+        Usuario.find({}, 'nombre email role google img')
             .or({ 'nombre': regex }, { 'email': regex })
             .exec((err, usuarios) => {
                 if (err) {

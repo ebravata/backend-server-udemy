@@ -12,11 +12,16 @@ var mdAutenticacion = require('../middlewares/autenticacion')
 app.get('/', (req, res, next) => {
 
     var desde = req.query.desde || 0;
+    var limit = 5;
     desde = Number(desde);
+
+    if (desde === 0){
+      limit = 0
+    }
 
     Hospital.find({}) // Se puede especificar los campos que se desea que se devuelvan
         .skip(desde)
-        .limit(5)
+        .limit(limit)
         .populate('usuario', 'nombre email')
         .exec(
             (err, hospitales) => {
@@ -28,7 +33,7 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                Hospital.count({}, (err, conteo) => {
+                Hospital.countDocuments({}, (err, conteo) => {
 
                     res.status(200).json({
                         ok: true,
@@ -154,5 +159,44 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     });
 });
+
+// ===========================================
+// Obtener un hospital mediante su id
+// ===========================================
+
+app.get('/:id', (req, res) => {
+
+  var id = req.params.id;
+
+  Hospital.findById(id)
+    .populate('usuario', 'nombre img email')
+    .exec((err, hospital) => {
+
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar hospital',
+          errors: err
+        });
+      }
+
+      if (!hospital) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El hospital con el id ' + id + 'no existe',
+          errors: {
+            message: 'No existe un hospital ese ID'
+          }
+        });
+
+      }
+
+      res.status(200).json({
+        ok: true,
+        hospital: hospital
+      });
+    })
+  })
+
 
 module.exports = app;

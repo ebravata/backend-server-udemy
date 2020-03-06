@@ -16,7 +16,7 @@ app.get('/', (req, res, next) => {
     desde = Number(desde);
 
     // Usuario.find({}, (err, usuarios) => { Con los parametros asi devuelve todos los campos de los usuarios hasta el password
-    Usuario.find({}, 'nombre email role img') // Se puede especificar los campos que se desea que se devuelvan
+    Usuario.find({}, 'nombre email role img google') // Se puede especificar los campos que se desea que se devuelvan
         .skip(desde)
         .limit(5)
         .exec(
@@ -29,7 +29,7 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                Usuario.count({}, (err, conteo) => {
+                Usuario.countDocuments({}, (err, conteo) => {
 
                     res.status(200).json({
                         ok: true,
@@ -63,7 +63,7 @@ app.get('/', (req, res, next) => {
 // ===========================================
 // Actualizar un usuario
 // ===========================================
-app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_ROLE], (req, res) => {
 
     var id = req.params.id;
     var body = req.body;
@@ -113,7 +113,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 // ===========================================
 // Crear un nuevo usuario
 // ===========================================
-app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+app.post('/', (req, res) => {
 
     var body = req.body;
     var usuario = new Usuario({
@@ -148,7 +148,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 // Borrar un nuevo usuario
 // ===========================================
 
-app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.delete('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_ROLE], (req, res) => {
 
     var id = req.params.id;
 

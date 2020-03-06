@@ -91,8 +91,8 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
             var pathViejo = './uploads/usuarios/' + usuario.img;
             // Si existe ya una imagen, la borra para colocar la nueva
             if (fs.existsSync(pathViejo)) {
-                // fs.unlink(pathViejo, err => { return err; }); unlink pide el callback
-                fs.unlinkSync(pathViejo);
+                fs.unlink(pathViejo, err => { return err; }); //unlink pide el callback
+                // fs.unlinkSync(pathViejo);
             }
 
             usuario.img = nombreArchivo;
@@ -135,8 +135,8 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
             var pathViejo = './uploads/medicos/' + medico.img;
             // Si existe ya una imagen, la borra para colocar la nueva
             if (fs.existsSync(pathViejo)) {
-                // fs.unlink(pathViejo, err => { return err; }); unlink pide el callback
-                fs.unlinkSync(pathViejo);
+                fs.unlink(pathViejo, err => { return err; }); //unlink pide el callback
+                // fs.unlinkSync(pathViejo);
             }
 
             medico.img = nombreArchivo;
@@ -145,14 +145,14 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                 if (err) {
                     return res.status(400).json({
                         ok: false,
-                        mensaje: 'Error al actualizar la imagen del medico',
+                        mensaje: 'Error al actualizar la imagen del médico',
                         errors: err
                     });
                 }
 
                 return res.status(200).json({
                     ok: true,
-                    mensaje: 'Imagen de medico actualizada',
+                    mensaje: 'Imagen de médico actualizada',
                     medico: medicoActualizado
                 });
 
@@ -174,12 +174,12 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                 });
             }
 
-
+            console.log('imagen hospital:', hospital.img)
             var pathViejo = './uploads/hospitales/' + hospital.img;
             // Si existe ya una imagen, la borra para colocar la nueva
             if (fs.existsSync(pathViejo)) {
-                // fs.unlink(pathViejo, err => { return err; }); unlink pide el callback
-                fs.unlinkSync(pathViejo);
+                fs.unlink(pathViejo, err => { return err; }); //unlink pide el callback
+                // fs.unlinkSync(pathViejo);
             }
 
             hospital.img = nombreArchivo;

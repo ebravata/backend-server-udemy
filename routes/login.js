@@ -7,11 +7,28 @@ var app = express();
 var Usuario = require('../models/usuario');
 var SEED = require('../config/config').SEED; // jala la constante SEED definida en el archivo global 'config'
 
+var mdAutenticacion = require('../middlewares/autenticacion');
+
 // Google
 var CLIENT_ID = require('../config/config').CLIENT_ID; // jala la constante CLIENT_ID definida en el archivo global 'config'
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(CLIENT_ID);
 
+// ===========================================
+// Renovacion de Token
+// ===========================================
+app.get( '/renuevatoken', mdAutenticacion.verificaToken, (req, res) => {
+
+  // si logra posar por el middleware mdAutenticacion entonces entrará hasta acá y podemos renovar el Token
+  var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 14400 }); // 4 horas
+
+  return res.status(200).json({
+      ok: true,
+      token: token,
+      usuario: req.usuario
+  });
+
+});
 
 // ===========================================
 // Login de usuario (Google)
@@ -39,7 +56,6 @@ async function verify(token) {
 app.post('/google', async(req, res) => {
 
     var token = req.body.token;
-
     var googleUser = await verify(token)
         .catch(e => {
             return res.status(403).json({
@@ -75,7 +91,8 @@ app.post('/google', async(req, res) => {
                     ok: true,
                     usuario: usuarioBD,
                     token: token,
-                    id: usuarioBD.id
+                    id: usuarioBD._id,
+                    menu: obtenerMenu( usuarioBD.role)
                 });
 
             }
@@ -97,7 +114,8 @@ app.post('/google', async(req, res) => {
                     ok: true,
                     usuario: usuarioBD,
                     token: token,
-                    id: usuarioBD._id
+                    id: usuarioBD._id,
+                    menu: obtenerMenu( usuarioBD.role )
                 });
 
             });
@@ -146,9 +164,44 @@ app.post('/', (req, res) => {
             ok: true,
             usuario: usuarioBD,
             token: token,
-            id: usuarioBD.id
+            id: usuarioBD.id,
+            menu: obtenerMenu( usuarioBD.role )
         });
     });
 });
 
+function obtenerMenu( ROLE ){
+
+  var menu = [
+   {
+     titulo: 'Principal',
+     icono: 'mdi mdi-gauge',
+     submenu: [
+      { titulo: 'Dasboard', url: '/dashboard'},
+      { titulo: 'ProgressBar', url: '/progress'},
+      { titulo: 'Gráficas', url: '/graficas1'},
+      { titulo: 'Promesas', url: '/promesas'},
+      { titulo: 'Rxjs Componente', url: '/rxjs'}
+     ]
+   },
+   {
+     titulo: 'Mantenimiento',
+     icono: 'mdi mdi-folder-lock-open',
+     submenu: [
+      // { titulo: 'Usuarios', url: '/usuarios'},
+      { titulo: 'Médicos', url: '/medicos'},
+      { titulo: 'Hospitales', url: '/hospitales'}
+     ]
+   }
+ ];
+
+ if ( ROLE === 'ADMIN_ROLE'){
+
+   menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios'});
+
+ }
+
+ return menu;
+
+}
 module.exports = app;
